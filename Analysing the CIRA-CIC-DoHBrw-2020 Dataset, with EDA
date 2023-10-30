@@ -1,0 +1,50 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from google.colab import drive
+from scipy.stats import norm
+
+drive.mount('/content/drive')
+
+# Loading data sets from the google drive
+dataset1 = pd.read_csv('/content/drive/My Drive/Datasets/l2-malicious.csv')
+dataset2 = pd.read_csv('/content/drive/My Drive/Datasets/l1-doh.csv')
+dataset3 = pd.read_csv('/content/drive/My Drive/Datasets/l1-nondoh.csv')
+dataset4 = pd.read_csv('/content/drive/My Drive/Datasets/l2-benign.csv')
+
+# Combining the datasets with a 'source' column to identify the original dataset for each row
+combined = pd.concat(
+    [dataset1.assign(source='l2-malicious.csv'),
+     dataset2.assign(source='l1-doh.csv'),
+     dataset3.assign(source='l1-nondoh'),
+     dataset4.assign(source='l2-benign')],
+    ignore_index=True
+)
+
+# Assuming 'FlowSentRate' represents Velocity,
+# calculating velocity and store it in a new column
+combined['Velocity'] = combined['FlowSentRate']
+
+# Subseting the data to consider only 0.0001 of it due to the large quantity of data
+subset = combined.sample(frac=0.0001, random_state=1)
+
+# 1. Data Profiling and Relationships Among Features
+# Correlation analysis on the subset
+correlation_matrix = subset.corr()
+
+# Visualizing the correlation matrix using a heatmap
+plt.figure(figsize=(22, 15))
+sns.set(font_scale=1.2)
+heatmap = sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", annot_kws={"size": 10})
+heatmap.set_xticklabels(heatmap.get_xticklabels(), rotation=90)
+heatmap.set_yticklabels(heatmap.get_yticklabels(), rotation=0) 
+plt.title("Correlation Matrix Heatmap")
+plt.show()
+
+# 2. Investigate the relationship between Velocity and PDF
+# Visualizing the distribution of 'Velocity' and fit a normal distribution on the subset
+sns.distplot(subset['Velocity'], fit=norm, kde=False)
+plt.title("Distribution of FlowSentRate (Velocity) with PDF")
+plt.xlabel("Velocity (bps)")
+plt.ylabel("Density")
+plt.show()

@@ -1,0 +1,21 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from google.colab import drive
+drive.mount('/content/drive')
+
+dataset1 = pd.read_csv('/content/drive/My Drive/Datasets/l2-malicious.csv')
+dataset2 = pd.read_csv('/content/drive/My Drive/Datasets/l1-doh.csv')
+dataset3 = pd.read_csv('/content/drive/My Drive/Datasets/l1-nondoh.csv')
+dataset4 = pd.read_csv('/content/drive/My Drive/Datasets/l2-benign.csv')
+
+combined = pd.concat(
+    [dataset1.assign(source='l2-malicious.csv'),
+     dataset2.assign(source='l1-doh.csv'),
+     dataset3.assign(source='l1-nondoh'),
+     dataset4.assign(source='l2-benign')],
+    ignore_index=True
+)
+
+sns.pairplot(data=combined, hue='source', vars=['PacketLengthMean'])
+plt.show()
